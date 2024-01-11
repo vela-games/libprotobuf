@@ -1,0 +1,57 @@
+diff --git a/src/google/protobuf/compiler/cpp/parse_function_generator.cc b/src/google/protobuf/compiler/cpp/parse_function_generator.cc
+index 1b8ffc4c5..a6c9bdfba 100644
+--- a/src/google/protobuf/compiler/cpp/parse_function_generator.cc
++++ b/src/google/protobuf/compiler/cpp/parse_function_generator.cc
+@@ -528,7 +528,7 @@ void ParseFunctionGenerator::GenerateTailCallTable(io::Printer* printer) {
+                                       ShouldSplit(aux_entry.field, options_))},
+                         {"strict",
+                          utf8_check == internal::cpp::Utf8CheckMode::kStrict},
+-                        {"verify",
++                        {"btree_verify",
+                          utf8_check == internal::cpp::Utf8CheckMode::kVerify},
+                         {"validate", validated_enum},
+                         {"key_wire", map_key->type()},
+@@ -537,7 +537,7 @@ void ParseFunctionGenerator::GenerateTailCallTable(io::Printer* printer) {
+                     R"cc(
+                       {::_pbi::TcParser::GetMapAuxInfo<
+                           decltype($classname$().$field$)>(
+-                          $strict$, $verify$, $validate$, $key_wire$,
++                          $strict$, $btree_verify$, $validate$, $key_wire$,
+                           $value_wire$)},
+                     )cc");
+                 break;
+diff --git a/src/google/protobuf/message_lite.h b/src/google/protobuf/message_lite.h
+index de8bd19aa..52bcb9f02 100644
+--- a/src/google/protobuf/message_lite.h
++++ b/src/google/protobuf/message_lite.h
+@@ -84,7 +84,7 @@ class PROTOBUF_EXPORT CachedSize {
+   constexpr CachedSize() noexcept : atom_(Scalar{}) {}
+   // NOLINTNEXTLINE(google-explicit-constructor)
+   constexpr CachedSize(Scalar desired) noexcept : atom_(desired) {}
+-#if PROTOBUF_BUILTIN_ATOMIC
++#ifdef PROTOBUF_BUILTIN_ATOMIC
+   constexpr CachedSize(const CachedSize& other) = default;
+
+   Scalar Get() const noexcept {
+@@ -111,7 +111,7 @@ class PROTOBUF_EXPORT CachedSize {
+ #endif
+
+  private:
+-#if PROTOBUF_BUILTIN_ATOMIC
++#ifdef PROTOBUF_BUILTIN_ATOMIC
+   Scalar atom_;
+ #else
+   std::atomic<Scalar> atom_;
+diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
+index 25abc3039..91ab8ecbd 100644
+--- a/src/google/protobuf/port_def.inc
++++ b/src/google/protobuf/port_def.inc
+@@ -1114,7 +1114,7 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
+ #pragma warning(disable: 4125)
+ #endif
+
+-#if PROTOBUF_ENABLE_DEBUG_LOGGING_MAY_LEAK_PII
++#ifdef PROTOBUF_ENABLE_DEBUG_LOGGING_MAY_LEAK_PII
+ #define PROTOBUF_DEBUG true
+ #else
+ #define PROTOBUF_DEBUG false

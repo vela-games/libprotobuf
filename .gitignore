@@ -1,0 +1,5 @@
+# Ignore built files
+libprotobuf/lib/**/Debug
+libprotobuf/lib/**/Release
+libprotobuf/include
+libprotobuf/bin
